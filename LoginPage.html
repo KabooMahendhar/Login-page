@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Service Booking App</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Full page body */
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            transition: background-image 0.5s ease;
+            position: relative;
+        }
+
+        /* Dark overlay over background image */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: -1;
+        }
+
+        /* Login page background */
+        body.login-background {
+            background-image:
+                linear-gradient(
+                    rgba(0, 70, 140, 0.25),
+                    rgba(0, 0, 0, 0.55)
+                ),
+                url("https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+        }
+
+        /* Dashboard background */
+        body.dashboard-background {
+            background-image:
+                linear-gradient(
+                    rgba(0, 0, 0, 0.55),
+                    rgba(0, 60, 100, 0.65)
+                ),
+                url("https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1920&q=85");
+        }
+
+        /* Authentication container */
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 28px;
+            border-radius: 18px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .app-title {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+        .app-title .logo {
+            font-size: 48px;
+            margin-bottom: 7px;
+        }
+
+        .app-title h1 {
+            color: #007bff;
+            font-size: 27px;
+        }
+
+        .app-title p {
+            margin-top: 5px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 22px;
+            overflow: hidden;
+            border-radius: 9px;
+            background: #e9ecef;
+        }
+
+        .tabs button {
+            flex: 1;
+            padding: 11px 5px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .tabs button:hover {
+            background: #d8e8ff;
+        }
+
+        .tabs button.active {
+            background: #007bff;
+            color: white;
+        }
+
+        /* Forms */
+        .form {
+            display: none;
+        }
+
+        .form.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .form h2 {
+            margin-bottom: 13px;
+            color: #222;
+        }
+
+        .form-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            position: relative;
+            margin: 11px 0;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 13px 45px 13px 13px;
+            border: 1px solid #ccc;
+            border-radius: 9px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.14);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 19px;
+        }
+
+        /* Main buttons */
+        button.main-btn {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 9px;
+            margin-top: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button.main-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 16px rgba(0, 123, 255, 0.35);
+        }
+
+        .demo-login {
+            margin-top: 18px;
+            padding: 11px;
+            background: #e9f4ff;
+            border-left: 4px solid #007bff;
+            border-radius: 7px;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            width: 100%;
+            max-width: 1050px;
+            display: none;
+            background: rgba(255, 255, 255, 0.94);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-header h2 {
+            color: #222;
+            margin-bottom: 4px;
+        }
+
+        .dashboard-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .header-icon {
+            width: 55px;
+            height: 55px;
+            background: #007bff;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            font-size: 27px;
+        }
+
+        /* Offer banner */
+        .banner {
+            background:
+                linear-gradient(135deg, rgba(255, 152, 0, 0.95), rgba(255, 87, 34, 0.95)),
+                url("https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+            background-position: center;
+            background-size: cover;
+            color: white;
+            padding: 23px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            text-align: center;
+            font-size: 17px;
+            line-height: 1.6;
+            box-shadow: 0 7px 18px rgba(255, 87, 34, 0.25);
+        }
+
+        .banner b {
+            background: white;
+            color: #ff5722;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .section-heading {
+            margin-bottom: 15px;
+            color: #222;
+        }
+
+        /* Service cards */
+        .services {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .card {
+            background: rgba(245, 245, 245, 0.96);
+            min-height: 175px;
+            padding: 20px 12px;
+            border-radius: 14px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #e7e7e7;
+            transition: transform 0.3s, background 0.3s, color 0.3s;
+        }
+
+        .card:hover {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            transform: translateY(-7px);
+            box-shadow: 0 10px 20px rgba(0, 123, 255, 0.3);
+        }
+
+        .card .icon {
+            width: 65px;
+            height: 65px;
+            margin: 0 auto 12px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 34px;
+            box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+        }
+
+        .card h3 {
+            margin-bottom: 7px;
+        }
+
+        .card p {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .logout {
+            max-width: 200px;
+            display: block;
+            margin: 25px auto 0 !important;
+            background: linear-gradient(135deg, #dc3545, #b71c1c) !important;
+        }
+
+        .logout:hover {
+            box-shadow: 0 7px 16px rgba(220, 53, 69, 0.35) !important;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            right: 25px;
+            bottom: 25px;
+            max-width: 340px;
+            background: #28a745;
+            color: white;
+            padding: 15px 24px;
+            border-radius: 9px;
+            display: none;
+            z-index: 1000;
+            font-weight: bold;
+            box-shadow: 0 7px 22px rgba(0, 0, 0, 0.35);
+            animation: slideIn 0.4s ease;
+        }
+
+        .toast.error {
+            background: #dc3545;
+        }
+
+        .toast.success {
+            background: #28a745;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Tablet */
+        @media (max-width: 850px) {
+            .services {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dashboard {
+                max-width: 700px;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 500px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .auth-container {
+                margin-top: 25px;
+                padding: 20px;
+            }
+
+            .dashboard {
+                padding: 18px;
+            }
+
+            .services {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                min-height: auto;
+            }
+
+            .dashboard-header {
+                align-items: flex-start;
+            }
+
+            .header-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+            }
+
+            .toast {
+                left: 15px;
+                right: 15px;
+                bottom: 15px;
+                text-align: center;
+            }
+
+            .tabs button {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body class="login-background">
+
+    <!-- Login, Create Account and Forgot Password Page -->
+    <div class="auth-container" id="authPage">
+
+        <div class="app-title">
+            <div class="logo">🛠️</div>
+            <h1>Quick Service</h1>
+            <p>Book trusted professionals near you</p>
+        </div>
+
+        <div class="tabs">
+            <button class="active" onclick="showTab('login', this)">
+                Login
+            </button>
+
+            <button onclick="showTab('create', this)">
+                Create
+            </button>
+
+            <button onclick="showTab('forgot', this)">
+                Forgot
+            </button>
+        </div>
+
+        <!-- Login Form -->
+        <div class="form active" id="login">
+            <h2>Welcome Back</h2>
+
+            <p class="form-description">
+                Log in to book professional home services.
+            </p>
+
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="loginUser"
+                    placeholder="Enter username"
+                    autocomplete="username"
+                >
+                <span class="input-icon">👤</span>
+            </div>
+
+            <div class="input-group">
+                <input
+                    type="password"
+                    id="loginPass"
+                    placeholder="Enter password"
+                    autocomplete="current-password"
+                >
+                <span class="input-icon">🔒</span>
+            </div>
+
+            <button class="main-btn" onclick="login()">
+                Login
+            </button>
+        </div>
+
+        <!-- Create Account Form -->
+        <div class="form" id="create">
+            <h2>Create Account</h2>
+
+            <p class="form-description">
+                Register to start booking services.
+            </p>
+
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="fullName"
+                    placeholder="Full name"
+                >
+                <span class="input-icon">🧑</span>
+            </div>
+
+            <div class="input-group">
+                <input
+                    type="text"
+                    id="newUser"
+                    placeholder="Choose username"
+                    autocomplete="username"
+                >
+                <span class="input-icon">👤</span>
+            </div>
+
+            <div class="input-group">
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Email address"
+                    autocomplete="email"
+                >
+                <span class="input-icon">✉️</span>
+            </div>
+
+            <div class="input-group">
+                <input
+                    type="password"
+                    id="newPass"
+                    placeholder="Create password"
+                    autocomplete="new-password"
+                >
+                <span class="input-icon">🔒</span>
+            </div>
+
+            <div class="input-group">
+                <input
+                    type="password"
+                    id="confirmPass"
+                    placeholder="Confirm password"
+                    autocomplete="new-password"
+                >
+                <span class="input-icon">✅</span>
+            </div>
+
+            <button class="main-btn" onclick="registerUser()">
+                Create Account
+            </button>
+        </div>
+
+        <!-- Forgot Password Form -->
+        <div class="form" id="forgot">
+            <h2>Forgot Password</h2>
+
+            <p class="form-description">
+                Enter your registered email address. A password reset link will
+                be sent to your email.
+            </p>
+
+            <div class="input-group">
+                <input
+                    type="email"
+                    id="resetEmail"
+                    placeholder="Enter registered email"
+                    autocomplete="email"
+                >
+                <span class="input-icon">✉️</span>
+            </div>
+
+            <button class="main-btn" onclick="forgotPassword()">
+                Send Reset Link
+            </button>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div class="dashboard" id="dashboard">
+
+        <div class="dashboard-header">
+            <div>
+                <h2 id="welcomeUser">Welcome</h2>
+                <p>Select a service and book a professional today.</p>
+            </div>
+
+            <div class="header-icon">👤</div>
+        </div>
+
+        <div class="banner">
+            🎉 Special Offer: Use Code
+            <b>SERVICE20</b>
+            and get 20% discount!
+        </div>
+
+        <h2 class="section-heading">Our Services</h2>
+
+        <div class="services">
+
+            <div class="card" onclick="bookService('Plumber')">
+                <div class="icon">🔧</div>
+                <h3>Plumber</h3>
+                <p>Pipe installation, water leakage and bathroom repairs.</p>
+            </div>
+
+            <div class="card" onclick="bookService('Mechanic')">
+                <div class="icon">🛠️</div>
+                <h3>Mechanic</h3>
+                <p>Professional vehicle maintenance and repair services.</p>
+            </div>
+
+            <div class="card" onclick="bookService('Driver')">
+                <div class="icon">🚗</div>
+                <h3>Driver</h3>
+                <p>Hire verified and experienced drivers for your journey.</p>
+            </div>
+
+            <div class="card" onclick="bookService('Electrician')">
+                <div class="icon">💡</div>
+                <h3>Electrician</h3>
+                <p>Electrical wiring, light installation and fault repairs.</p>
+            </div>
+
+            <div class="card" onclick="bookService('Carpenter')">
+                <div class="icon">🪚</div>
+                <h3>Carpenter</h3>
+                <p>Furniture installation, repair and custom woodwork.</p>
+            </div>
+
+            <div class="card" onclick="bookService('Cleaner')">
+                <div class="icon">🧹</div>
+                <h3>Cleaner</h3>
+                <p>Deep cleaning services for homes and offices.</p>
+            </div>
+
+            <div class="card" onclick="bookService('Painter')">
+                <div class="icon">🎨</div>
+                <h3>Painter</h3>
+                <p>Interior and exterior wall painting services.</p>
+            </div>
+
+            <div class="card" onclick="bookService('Gardener')">
+                <div class="icon">🌱</div>
+                <h3>Gardener</h3>
+                <p>Garden cleaning, plant care and lawn maintenance.</p>
+            </div>
+
+        </div>
+
+        <button class="main-btn logout" onclick="logout()">
+            Logout
+        </button>
+    </div>
+
+    <!-- Toast Message -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let users = [
+            {
+                username: "admin",
+                password: "1234",
+                fullname: "Administrator",
+                email: "admin@example.com"
+            }
+        ];
+
+        let toastTimer;
+
+        function showTab(tabId, button) {
+            const forms = document.querySelectorAll(".form");
+            const buttons = document.querySelectorAll(".tabs button");
+
+            forms.forEach(function(form) {
+                form.classList.remove("active");
+            });
+
+            buttons.forEach(function(tabButton) {
+                tabButton.classList.remove("active");
+            });
+
+            document.getElementById(tabId).classList.add("active");
+            button.classList.add("active");
+        }
+
+        function login() {
+            const username =
+                document.getElementById("loginUser").value.trim();
+
+            const password =
+                document.getElementById("loginPass").value.trim();
+
+            if (username === "" || password === "") {
+                showToast(
+                    "Please enter username and password.",
+                    "error"
+                );
+                return;
+            }
+
+            const user = users.find(function(currentUser) {
+                return (
+                    currentUser.username === username &&
+                    currentUser.password === password
+                );
+            });
+
+            if (user) {
+                document.getElementById("authPage").style.display = "none";
+                document.getElementById("dashboard").style.display = "block";
+
+                document.getElementById("welcomeUser").innerText =
+                    "Welcome, " + user.fullname + "!";
+
+                document.body.classList.remove("login-background");
+                document.body.classList.add("dashboard-background");
+
+                document.getElementById("loginPass").value = "";
+
+                showToast("Login successful!", "success");
+            } else {
+                showToast(
+                    "Invalid username or password.",
+                    "error"
+                );
+            }
+        }
+
+        function registerUser() {
+            const fullname =
+                document.getElementById("fullName").value.trim();
+
+            const username =
+                document.getElementById("newUser").value.trim();
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("newPass").value.trim();
+
+            const confirmPassword =
+                document.getElementById("confirmPass").value.trim();
+
+            if (
+                fullname === "" ||
+                username === "" ||
+                email === "" ||
+                password === "" ||
+                confirmPassword === ""
+            ) {
+                showToast("Please fill in all fields.", "error");
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showToast(
+                    "Please enter a valid email address.",
+                    "error"
+                );
+                return;
+            }
+
+            if (username.length < 4) {
+                showToast(
+                    "Username must contain at least 4 characters.",
+                    "error"
+                );
+                return;
+            }
+
+            if (password.length < 4) {
+                showToast(
+                    "Password must contain at least 4 characters.",
+                    "error"
+                );
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast("Passwords do not match.", "error");
+                return;
+            }
+
+            const usernameExists = users.some(function(user) {
+                return user.username.toLowerCase() === username.toLowerCase();
+            });
+
+            if (usernameExists) {
+                showToast("Username already exists.", "error");
+                return;
+            }
+
+            const emailExists = users.some(function(user) {
+                return user.email.toLowerCase() === email.toLowerCase();
+            });
+
+            if (emailExists) {
+                showToast(
+                    "An account already exists with this email.",
+                    "error"
+                );
+                return;
+            }
+
+            users.push({
+                fullname: fullname,
+                username: username,
+                email: email,
+                password: password
+            });
+
+            document.getElementById("loginUser").value = username;
+
+            clearRegistrationForm();
+
+            showToast(
+                "Account created! You can now log in.",
+                "success"
+            );
+
+            const loginTab =
+                document.querySelector(".tabs button:first-child");
+
+            showTab("login", loginTab);
+        }
+
+        function forgotPassword() {
+            const email =
+                document.getElementById("resetEmail").value.trim();
+
+            if (email === "") {
+                showToast("Please enter your email address.", "error");
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showToast(
+                    "Please enter a valid email address.",
+                    "error"
+                );
+                return;
+            }
+
+            const userExists = users.some(function(user) {
+                return user.email.toLowerCase() === email.toLowerCase();
+            });
+
+            if (!userExists) {
+                showToast(
+                    "No account was found with this email.",
+                    "error"
+                );
+                return;
+            }
+
+            showToast(
+                "Password reset link sent to " + email,
+                "success"
+            );
+
+            document.getElementById("resetEmail").value = "";
+        }
+
+        function bookService(serviceName) {
+            showToast(
+                serviceName + " booking confirmed successfully!",
+                "success"
+            );
+        }
+
+        function logout() {
+            document.getElementById("dashboard").style.display = "none";
+            document.getElementById("authPage").style.display = "block";
+
+            document.body.classList.remove("dashboard-background");
+            document.body.classList.add("login-background");
+
+            document.getElementById("loginUser").value = "";
+            document.getElementById("loginPass").value = "";
+
+            showToast("Logged out successfully.", "success");
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById("toast");
+
+            clearTimeout(toastTimer);
+
+            toast.innerText = message;
+            toast.className = "toast";
+
+            if (type === "error") {
+                toast.classList.add("error");
+            } else {
+                toast.classList.add("success");
+            }
+
+            toast.style.display = "block";
+
+            toastTimer = setTimeout(function() {
+                toast.style.display = "none";
+            }, 2800);
+        }
+
+        function isValidEmail(email) {
+            const emailPattern =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            return emailPattern.test(email);
+        }
+
+        function clearRegistrationForm() {
+            document.getElementById("fullName").value = "";
+            document.getElementById("newUser").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("newPass").value = "";
+            document.getElementById("confirmPass").value = "";
+        }
+
+        /* Login by pressing Enter */
+        document.addEventListener("keydown", function(event) {
+            const loginForm =
+                document.getElementById("login");
+
+            if (
+                event.key === "Enter" &&
+                loginForm.classList.contains("active") &&
+                document.getElementById("authPage").style.display !== "none"
+            ) {
+                login();
+            }
+        });
+    </script>
+
+</body>
+</html>
